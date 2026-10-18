@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: PAYMENT API QUALITY PORTFOLIO
+  version: 1.0.0
+  description: Synthetic REST API used for learning and demonstrating banking payment testing.
+
+servers:
+  - url: https://{{base_url}}
+
+paths:
+  /auth/token:
+    get:
+      summary: Authorization Token
+      description: Retrieves an access token for authenticated requests.
+      responses:
+        '200':
+          description: Token retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+
+  /inquiryCheck:
+    get:
+      summary: Inquiry Check – List of Payments
+      description: Returns a list of payments stored in the Oracle DB (synthetic).
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of payments returned
+
+  /payments/credit-transfer:
+    post:
+      summary: SEPA Credit Transfer (pacs.008)
+      description: Creates a standard SEPA credit transfer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditTransfer'
+      responses:
+        '201':
+          description: Payment created
+        '400':
+          description: Invalid request format
+        '422':
+          description: Missing required fields
+
+  /payments/instant:
+    post:
+      summary: SEPA Instant Payment (pacs.008 INST)
+      description: Creates an instant SEPA payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstantPayment'
+      responses:
+        '201':
+          description: Instant payment created
+        '400':
+          description: Invalid request format
+
+  /payments/direct-debit:
+    post:
+      summary: Direct Debit (pacs.003)
+      description: Creates a direct debit request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectDebit'
+      responses:
+        '201':
+          description: Direct debit created
+        '400':
+          description: Invalid request format
+
+  /payments/status:
+    get:
+      summary: Status Check (pacs.002)
+      description: Retrieves the status of a payment by EndToEndId.
+      parameters:
+        - name: endToEndId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatus'
+        '404':
+          description: Payment not found
+
+  /payments/return:
+    post:
+      summary: Payment Return (pacs.004)
+      description: Returns a previously executed payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentReturn'
+      responses:
+        '201':
+          description: Return processed
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    CreditTransfer:
+      type: object
+      required:
+        - message_type
+        - end_to_end_id
+        - amount
+        - currency
+        - debtor_iban
+        - creditor_iban
+      properties:
+        message_type:
+          type: string
+          example: pacs.008
+        end_to_end_id:
+          type: string
+          example: E2E-2026-001
+        amount:
+          type: number
+          example: 250.00
+        currency:
+          type: string
+          example: EUR
+        debtor_iban:
+          type: string
+        creditor_iban:
+          type: string
+        debtor_name:
+          type: string
+        creditor_name:
+          type: string
+        charge_bearer:
