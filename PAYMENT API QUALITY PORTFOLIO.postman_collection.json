@@ -1,0 +1,276 @@
+{
+  "info": {
+    "_postman_id": "2b951f1f-dfaa-4eda-9fce-cbc752619727",
+    "name": "PAYMENT API QUALITY PORTFOLIO",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "31067501"
+  },
+  "item": [
+    {
+      "name": "Inquiry check -list of payments",
+      "item": [
+        {
+          "name": "Authorization_Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n})\r\n\r\npm.test(\"Response is JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.environment.set(\"access_token\", response.access_token);\r\n    "
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/token/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "token",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payments_list DB Oracle",
+          "request": {
+            "auth": {
+              "type": "bearer"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inquiryCheck/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "inquiryCheck",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "pacs.008 – Customer Credit Transfer (SEPA Standard)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.008\",\r\n  \"end_to_end_id\": \"E2E-2026-001\",\r\n  \"amount\": \"250.00\",\r\n  \"currency\": \"EUR\",\r\n  \"debtor_iban\": \"SK6802000000001234567891\",\r\n  \"creditor_iban\": \"DE89370400440532013000\",\r\n  \"debtor_name\": \"Peter Bursa\",\r\n  \"creditor_name\": \"John Doe\",\r\n  \"charge_bearer\": \"SLEV\",\r\n  \"service_level\": \"SEPA\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "POST /payments/credit-transfer",
+              "host": [
+                "POST "
+              ],
+              "path": [
+                "payments",
+                "credit-transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SEPA Instant Payment (pacs.008 Instant)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.008\",\r\n  \"service_level\": \"INST\",\r\n  \"end_to_end_id\": \"E2E-INST-2026-002\",\r\n  \"amount\": \"50.00\",\r\n  \"currency\": \"EUR\",\r\n  \"debtor_iban\": \"SK3109000000001234567891\",\r\n  \"creditor_iban\": \"AT611904300234573201\",\r\n  \"debtor_name\": \"Peter Bursa\",\r\n  \"creditor_name\": \"Instant Receiver\",\r\n  \"execution_speed\": \"REAL_TIME\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "POST /payments/instant",
+              "host": [
+                "POST "
+              ],
+              "path": [
+                "payments",
+                "instant"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Direct Debit (pacs.003)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.003\",\r\n  \"mandate_id\": \"MANDATE-2026-01\",\r\n  \"amount\": \"19.99\",\r\n  \"currency\": \"EUR\",\r\n  \"debtor_iban\": \"SK7202000000009876543210\",\r\n  \"creditor_iban\": \"SK6802000000001234567891\",\r\n  \"creditor_name\": \"Utility Company\",\r\n  \"debtor_name\": \"Peter Bursa\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unhappy Scenario – Wrong IBAN Format",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.008\",\r\n  \"end_to_end_id\": \"E2E-ERR-001\",\r\n  \"amount\": \"100.00\",\r\n  \"currency\": \"EUR\",\r\n  \"debtor_iban\": \"SK123\", \r\n  \"creditor_iban\": \"DE89INVALID\",\r\n  \"debtor_name\": \"Peter Bursa\",\r\n  \"creditor_name\": \"Wrong IBAN Test\",\r\n  \"charge_bearer\": \"SHAR\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "POST /payments/credit-transfer",
+              "host": [
+                "POST "
+              ],
+              "path": [
+                "payments",
+                "credit-transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unhappy Scenario – Missing Required Field (EndToEndId)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.008\",\r\n  \"amount\": \"75.00\",\r\n  \"currency\": \"EUR\",\r\n  \"debtor_iban\": \"SK6802000000001234567891\",\r\n  \"creditor_iban\": \"DE89370400440532013000\",\r\n  \"debtor_name\": \"Peter Bursa\",\r\n  \"creditor_name\": \"Missing Field Test\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "POST /payments/credit-transfer",
+              "host": [
+                "POST "
+              ],
+              "path": [
+                "payments",
+                "credit-transfer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Wrong Currency for SEPA (should be EUR)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.008\",\r\n  \"service_level\": \"SEPA\",\r\n  \"end_to_end_id\": \"E2E-ERR-002\",\r\n  \"amount\": \"100.00\",\r\n  \"currency\": \"USD\",\r\n  \"debtor_iban\": \"SK3109000000001234567891\",\r\n  \"creditor_iban\": \"FR7630006000011234567890189\",\r\n  \"debtor_name\": \"Peter Bursa\",\r\n  \"creditor_name\": \"Wrong Currency Test\"\r\n}\r\n//Expected result:\r\n//400 – SEPA payments must use EUR",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Status Check (pacs.002)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/*\r\nResponse example:\r\n{\r\n  \"message_type\": \"pacs.002\",\r\n  \"end_to_end_id\": \"E2E-2026-001\",\r\n  \"transaction_status\": \"ACSC\",\r\n  \"status_description\": \"Accepted for Settlement\"\r\n}\r\n*/"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "GET /payments/status?endToEndId=E2E-2026-001",
+              "host": [
+                "GET "
+              ],
+              "path": [
+                "payments",
+                "status"
+              ],
+              "query": [
+                {
+                  "key": "endToEndId",
+                  "value": "E2E-2026-001"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Payment Return (pacs.004)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"message_type\": \"pacs.004\",\r\n  \"original_end_to_end_id\": \"E2E-2026-001\",\r\n  \"return_reason\": \"AC04\",\r\n  \"amount\": \"250.00\",\r\n  \"currency\": \"EUR\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "POST /payments/return",
+              "host": [
+                "POST "
+              ],
+              "path": [
+                "payments",
+                "return"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
