@@ -1,129 +1,232 @@
 openapi: 3.0.3
+
 info:
-  title: PAYMENT API QUALITY PORTFOLIO
-  version: 1.0.0
-  description: Synthetic REST API used for learning and demonstrating banking payment testing.
+  title: Banking Payment API Quality Portfolio
+  version: 1.1.0
+  description: >
+    Synthetic banking REST API used to demonstrate API testing,
+    OAuth 2.0 authentication, authorization and payment-risk validation.
 
 servers:
-  - url: https://{{base_url}}
+  - url: https://g403c4e8554d7ee-isobudget.adb.eu-amsterdam-1.oraclecloudapps.com/ords/admin
+    description: Synthetic Oracle ORDS environment
+
+security:
+  - oauth2ClientCredentials: []
 
 paths:
-  /auth/token:
-    get:
-      summary: Authorization Token
-      description: Retrieves an access token for authenticated requests.
+  /oauth/token:
+    post:
+      summary: Obtain ORDS OAuth access token
+      description: >
+        Returns a temporary Bearer token using OAuth 2.0 Client Credentials.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - client_credentials
+                  example: client_credentials
       responses:
-        '200':
-          description: Token retrieved successfully
+        "200":
+          description: Access token returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          description: Invalid Client ID or Client Secret
+
+  /payments/inquiryCheck/:
+    get:
+      summary: Retrieve synthetic payment records
+      description: Returns payment records stored in the synthetic Oracle database.
+      responses:
+        "200":
+          description: Payment list returned successfully
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - items
                 properties:
-                  access_token:
-                    type: string
-
-  /inquiryCheck:
-    get:
-      summary: Inquiry Check – List of Payments
-      description: Returns a list of payments stored in the Oracle DB (synthetic).
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of payments returned
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payment"
+        "401":
+          description: Missing, invalid or expired access token
 
   /payments/credit-transfer:
     post:
-      summary: SEPA Credit Transfer (pacs.008)
-      description: Creates a standard SEPA credit transfer.
+      summary: Create SEPA Credit Transfer
+      description: Creates a synthetic SEPA credit transfer based on pacs.008.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreditTransfer'
+              $ref: "#/components/schemas/CreditTransfer"
       responses:
-        '201':
+        "201":
           description: Payment created
-        '400':
-          description: Invalid request format
-        '422':
-          description: Missing required fields
+        "400":
+          description: Invalid request
+        "401":
+          description: Missing, invalid or expired access token
+        "422":
+          description: Business or mandatory-field validation failed
 
   /payments/instant:
     post:
-      summary: SEPA Instant Payment (pacs.008 INST)
-      description: Creates an instant SEPA payment.
+      summary: Create SEPA Instant Payment
+      description: Creates a synthetic instant SEPA payment.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InstantPayment'
+              $ref: "#/components/schemas/CreditTransfer"
       responses:
-        '201':
+        "201":
           description: Instant payment created
-        '400':
-          description: Invalid request format
+        "400":
+          description: Invalid request
+        "401":
+          description: Missing, invalid or expired access token
 
   /payments/direct-debit:
     post:
-      summary: Direct Debit (pacs.003)
-      description: Creates a direct debit request.
+      summary: Create Direct Debit
+      description: Creates a synthetic direct-debit request based on pacs.003.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DirectDebit'
+              $ref: "#/components/schemas/DirectDebit"
       responses:
-        '201':
+        "201":
           description: Direct debit created
-        '400':
-          description: Invalid request format
+        "400":
+          description: Invalid request
+        "401":
+          description: Missing, invalid or expired access token
 
   /payments/status:
     get:
-      summary: Status Check (pacs.002)
-      description: Retrieves the status of a payment by EndToEndId.
+      summary: Retrieve payment status
+      description: Returns a synthetic pacs.002-style payment status.
       parameters:
         - name: endToEndId
           in: query
           required: true
           schema:
             type: string
+          example: E2E-2026-001
       responses:
-        '200':
-          description: Status returned
+        "200":
+          description: Payment status returned
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaymentStatus'
-        '404':
+                $ref: "#/components/schemas/PaymentStatus"
+        "401":
+          description: Missing, invalid or expired access token
+        "404":
           description: Payment not found
 
   /payments/return:
     post:
-      summary: Payment Return (pacs.004)
-      description: Returns a previously executed payment.
+      summary: Return Payment
+      description: Creates a synthetic pacs.004-style payment return.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PaymentReturn'
+              $ref: "#/components/schemas/PaymentReturn"
       responses:
-        '201':
-          description: Return processed
+        "201":
+          description: Payment return processed
+        "400":
+          description: Invalid payment-return request
+        "401":
+          description: Missing, invalid or expired access token
+        "404":
+          description: Original payment not found
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
+    oauth2ClientCredentials:
+      type: oauth2
+      description: OAuth 2.0 Client Credentials authentication provided by Oracle ORDS.
+      flows:
+        clientCredentials:
+          tokenUrl: https://g403c4e8554d7ee-isobudget.adb.eu-amsterdam-1.oraclecloudapps.com/ords/admin/oauth/token
+          scopes: {}
 
   schemas:
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: Temporary ORDS access token
+        token_type:
+          type: string
+          example: bearer
+        expires_in:
+          type: integer
+          example: 3600
+
+    Payment:
+      type: object
+      properties:
+        payment_id:
+          type: string
+          example: PAY-016
+        end_to_end_id:
+          type: string
+          example: E2E-000016
+        debtor_name:
+          type: string
+          example: Synthetic Debtor
+        creditor_name:
+          type: string
+          example: Synthetic Creditor
+        amount:
+          type: number
+          format: double
+          example: 250.00
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: EUR
+        payment_type:
+          type: string
+          example: SEPA
+        payment_status:
+          type: string
+          example: ACSC
+        created_at:
+          type: string
+          format: date-time
+
     CreditTransfer:
       type: object
       required:
@@ -137,15 +240,62 @@ components:
         message_type:
           type: string
           example: pacs.008
+        service_level:
+          type: string
+          enum:
+            - SEPA
+            - INST
+          example: SEPA
         end_to_end_id:
           type: string
           example: E2E-2026-001
         amount:
           type: number
+          format: double
+          minimum: 0.01
           example: 250.00
         currency:
           type: string
-          example: EUR
+          enum:
+            - EUR
+        debtor_iban:
+          type: string
+          example: SK0000000000000000000000
+        creditor_iban:
+          type: string
+          example: DE00000000000000000000
+        debtor_name:
+          type: string
+          example: Synthetic Debtor
+        creditor_name:
+          type: string
+          example: Synthetic Creditor
+
+    DirectDebit:
+      type: object
+      required:
+        - message_type
+        - mandate_id
+        - amount
+        - currency
+        - debtor_iban
+        - creditor_iban
+      properties:
+        message_type:
+          type: string
+          example: pacs.003
+        mandate_id:
+          type: string
+          example: SYNTHETIC-MANDATE-001
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 19.99
+        currency:
+          type: string
+          enum:
+            - EUR
         debtor_iban:
           type: string
         creditor_iban:
@@ -154,4 +304,51 @@ components:
           type: string
         creditor_name:
           type: string
-        charge_bearer:
+
+    PaymentStatus:
+      type: object
+      properties:
+        message_type:
+          type: string
+          example: pacs.002
+        end_to_end_id:
+          type: string
+          example: E2E-2026-001
+        transaction_status:
+          type: string
+          enum:
+            - ACSC
+            - ACSP
+            - PDNG
+            - RJCT
+          example: ACSC
+        status_description:
+          type: string
+          example: Accepted for settlement
+
+    PaymentReturn:
+      type: object
+      required:
+        - message_type
+        - original_end_to_end_id
+        - return_reason
+        - amount
+        - currency
+      properties:
+        message_type:
+          type: string
+          example: pacs.004
+        original_end_to_end_id:
+          type: string
+          example: E2E-2026-001
+        return_reason:
+          type: string
+          example: AC04
+        amount:
+          type: number
+          format: double
+          example: 250.00
+        currency:
+          type: string
+          enum:
+            - EUR
