@@ -47,6 +47,12 @@ POST /oauth/token
 - `Payment-API-Quality-Portfolio.postman_collection.json`
 - `Oracle Payment API - Local.postman_environment.json`
 
+## Project Files
+
+- `Payment-API-Quality-Portfolio.postman_collection.json` – Postman API test collection
+- `Oracle-ORDS-Template.postman_environment.json` – reusable Postman environment template
+- `openapi 3.0.3.yaml` – OpenAPI contract covering OAuth and payment endpoints
+
 ## How to Run
 
 1. Import the collection and environment into Postman.
