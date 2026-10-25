@@ -1,21 +1,60 @@
-# BANKING-PAYMENT-API-LAB
-Personal learning project focused on expanding my banking payments testing expertise into API quality engineering
+Banking Payment API Lab
+Hands-on API testing portfolio applying banking payment knowledge to REST API quality engineering.
 
-## Project purpose
-The project demonstrates the testing of a synthetic Payment REST API, from exploratory testing and API contract validation to automated regression.
+The project uses a synthetic Oracle database exposed through Oracle REST Data Services (ORDS).
 
-## Planned Scope
--Synthetic payment data model
--Oracle Database Actions and ORDS REST API
--Postman exploratory and functional testing
--Javascript assertions using pm.test
--OpenAPI-based test design
--Git-based CI execution
+What This Project Demonstrates
+REST API testing with Postman
+OAuth 2.0 Client Credentials authentication
+Role-protected ORDS endpoints
+Positive and negative payment scenarios
+JavaScript assertions using pm.test
+Automatic access-token extraction and reuse
+Reusable Postman environment variables
+Authentication Flow
+Postman sends Client ID and Client Secret to the ORDS OAuth endpoint.
+Oracle ORDS returns an access token.
+Postman saves the token in {{access_token}}.
+Protected requests use Bearer {{access_token}}.
+Expected results:
 
-## Current Status
-The project is currently under development as part of my professional learning and preparation for future API testing opportunities in banking IT.
-
-## Data and Security
-This project uses only synthetic payment and account data.
-
-It contains no employer information, customer data, production credentials, internal endpoints, confidential documentation, or real banking records.
+No token: 401 Unauthorized
+Invalid token: 401 Unauthorized
+Valid token: 200 OK
+Covered Scenarios
+OAuth access-token request
+Protected endpoint without authorization
+Payment-list inquiry
+SEPA Credit Transfer
+SEPA Instant Payment
+Direct Debit
+Invalid IBAN
+Missing required field
+Invalid SEPA currency
+Payment status inquiry
+Payment return
+Repository Files
+Payment-API-Quality-Portfolio.postman_collection.json
+Oracle Payment API - Local.postman_environment.json
+How to Run
+Import the collection and environment into Postman.
+Select the Oracle payment environment.
+Add the required test credentials.
+Run Get ORDS OAuth Token.
+Run the protected payment requests.
+Current Status
+Implemented
+Synthetic Oracle payment database
+Oracle ORDS REST endpoints
+Postman API collection
+OAuth Client Credentials flow
+Role-protected API
+Automatic token handling
+Positive and negative scenarios
+In Progress
+JavaScript assertions for all requests
+Newman command-line execution
+GitHub Actions CI pipeline
+Automated test reports
+Disclaimer
+This is an independent portfolio project using synthetic data only. It contains no employer information, customer data or real banking records.
