@@ -13,6 +13,8 @@ The project uses a synthetic Oracle database exposed through Oracle REST Data Se
 - JavaScript assertions using `pm.test`
 - Automatic access-token extraction and reuse
 
+## All payment, account and party data shown in this repository is synthetic.
+
 ## Authentication Flow
 
 POST /oauth/token  
