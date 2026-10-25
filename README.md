@@ -54,6 +54,37 @@ POST /oauth/token
 3. Run `Get ORDS OAuth Token`.
 4. Run the protected payment requests.
 
+## Execution Evidence
+
+### Postman Collection Overview
+
+![Postman collection overview](./00-Requests-Overview-List.png)
+
+### OAuth Token Generation
+
+OAuth 2.0 Client Credentials request returns `200 OK` and passes all token assertions.
+
+![OAuth token generation](./01-Get%20ORDS%20OAuth%20Token%20%E2%86%92%20200.png)
+
+### Unauthorized Request
+
+The protected ORDS endpoint rejects a request without an access token with `401 Unauthorized`.
+
+![Unauthorized payment inquiry](./02-unauthorized-payment-inquiry-tests.png)
+
+### Authorized Request
+
+The same endpoint returns `200 OK` with a valid Bearer token and passes six response assertions.
+
+![Authorized payment inquiry](./03-authorized-payment-inquiry-tests.png)
+
+### Synthetic Payment Response
+
+The authorized inquiry returns synthetic payment records from the Oracle database.
+
+![Synthetic payment response](./04-payment-inquiry-json-response.png)
+
+
 ## Project Status
 
 - [x] Synthetic Oracle payment database
